@@ -6,7 +6,7 @@
   "description": "## Links",
   "main": "server.js",
   "scripts": {
-    "build": "cd frontend && npm install && npm run build",
+    "build": "cd Frontend && npm install && npm run build",
     "start": "node backend/server.js",
     "postinstall": "npm install && npm run build"
   },

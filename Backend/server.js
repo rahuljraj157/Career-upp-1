@@ -26,7 +26,7 @@ const server = http.createServer(app);
 const io = new SocketIoServer(server , {
     pingTimeout : 60000,  
     cors : {
-        origin: " https://careerup-sm48.onrender.com",
+        origin: " https://career-upp-bz9i.onrender.com",
         methods: ["GET", "POST"],
         credentials : true
     }
@@ -35,7 +35,7 @@ const io = new SocketIoServer(server , {
 
 const corsOptions = {
     origin: [
-        "https://careerup-sm48.onrender.com",
+        "https://career-upp-bz9i.onrender.com",
         "http://localhost:5173",
         "https://careerup.website",
         "http://localhost:3000",

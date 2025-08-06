@@ -55,7 +55,7 @@ const UserFeed = () => {
       }).catch((err) => console.log(err, 'axios posts err')
       ).finally(() => setIsLoading(false))
 
-    }, [ updateUI]);
+    }, [updateUI]);
 
     const navigateChat = () => {
       navigate('/message');

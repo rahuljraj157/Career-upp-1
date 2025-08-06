@@ -4,7 +4,10 @@ import toast from "react-hot-toast";
 export const axiosInstance = axios.create({
     // baseURL :'http://localhost:3000'
     // baseURL :  'https://careerup.website' 
-    baseURL : "/"
+    // baseURL : "/"
+     baseURL: "http://localhost:3000"
+
+
 });
 
 axiosInstance.interceptors.request.use((config) => {
@@ -34,9 +37,9 @@ axiosInstance.interceptors.response.use(
 
 
 export const adminAxiosInstance = axios.create({
-    // baseURL :  'http://localhost:3000/admin' 
+    baseURL :  'http://localhost:3000/admin' 
     // baseURL :  'https://careerup.website/admin' 
-    baseURL : '/admin'
+    // baseURL : '/admin'
 
 });
 

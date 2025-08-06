@@ -12,6 +12,10 @@ const notifySchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'users'  //Reference to the user who recieve the notification
     },
+    receiverCompany: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'companies'
+},
 
     post : {
         type : mongoose.Schema.Types.ObjectId,

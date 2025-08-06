@@ -24,17 +24,17 @@ export const signUp = async(userData: UserData , otp: string, isNotOtp: boolean)
 
 
 export const login = async (userData: UserData) => {
-    const response = await axiosInstance.post('/auth/login' , {userData});
+    const response = await axiosInstance.post('/auth/login' , userData);
     return response;
 }
 
-export const manageGoogleAuth = async (purpose: string) => {
+export const manageGoogleAuth = async (purpose: string, credential: string) => {
     let response;
-    if(purpose === 'signup') {
-        response = await axiosInstance.post('/auth/google');
+    if (purpose === 'signup') {
+        response = await axiosInstance.post('/auth/google', { credential });
 
     } else if (purpose === 'login') {
-        response = await axiosInstance.post('/auth/google/login');
+        response = await axiosInstance.post('/auth/google/login', { credential });
     }
     return response;
 }

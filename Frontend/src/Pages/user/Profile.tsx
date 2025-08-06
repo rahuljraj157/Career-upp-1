@@ -67,15 +67,42 @@ const Profile = () => {
     ).finally(() => setIsLoading(false));
   }
 
+  // const fetchProfileData = (profileId : string) => {
+  //   setIsLoading(true);
+  //   axiosInstance.get(`/profile/${profileId}`).then((res) => {
+  //     if(res.data.message){
+  //       setUserData(res.data.user);
+  //     }
+  //   }).catch((error) => console.log(error , 'axios')
+  //   ).finally(() => setIsLoading(false));
+  // }
   const fetchProfileData = (profileId : string) => {
-    setIsLoading(true);
-    axiosInstance.get(`/profile/${profileId}`).then((res) => {
-      if(res.data.message){
-        setUserData(res.data.user);
+  setIsLoading(true);
+  axiosInstance.get(`/profile/${profileId}`).then((res) => {
+    if(res.data.message){
+      setUserData(res.data.user);
+      // check role and fetch posts
+      if(res.data.user.role === 'Company'){
+        fetchCompanyPosts(profileId);
+      } else {
+        otherUserPostsFetch(profileId);
       }
-    }).catch((error) => console.log(error , 'axios')
-    ).finally(() => setIsLoading(false));
-  }
+    }
+  }).catch((error) => console.log(error , 'axios')
+  ).finally(() => setIsLoading(false));
+}
+
+const fetchCompanyPosts = (companyId : string) => {
+  setIsLoading(true);
+  axiosInstance.get(`/companyposts/${companyId}`).then((res) => {
+    if(res.data.message){
+      console.log("Fetched company posts:", res.data.posts,878878878);
+      setPosts(res.data.posts);
+    }
+  }).catch((error) => console.log(error , 'company posts fetch error')
+  ).finally(() => setIsLoading(false))
+}
+
 
   const fetchUserPosts = () => {
     setIsLoading(true);
@@ -88,9 +115,11 @@ const Profile = () => {
   }
 
   const otherUserPostsFetch = (userId : string) => {
+    console.log(userId, 'userId in profile',100000000);
     setIsLoading(true);
     axiosInstance.get(`/userposts/${userId}`).then((res) => {
       if(res.data.message){
+        console.log("Fetched posts:", res.data.posts);
         setPosts(res.data.posts);
       }
     }).catch((error) => console.log(error , 'user own posts fetch error')
@@ -115,8 +144,15 @@ const Profile = () => {
     } else {
       getOwnProfileData();
       fetchUserPosts();
+      // fetchCompanyPosts(userData?._id);
     }
   },[updateUI , id]);
+
+  useEffect(() => {
+  if (!id && userData?._id && userData?.role === 'Company') {
+    fetchCompanyPosts(userData._id);
+  }
+}, [userData, id]);
 
 
   useEffect(() => {
@@ -160,7 +196,7 @@ const Profile = () => {
 
             {/* center */}
             <div className="w-full flex-1 bg-bgColor px-4 flex flex-col gap-6 overflow-y-auto">
-              <PostCards setUpdateUI={setUpdateUI} userData={userData} showAllposts={false} posts={posts} />
+              <PostCards setUpdateUI={setUpdateUI} userData={userData} showAllposts={true} posts={posts} />
 
             </div>
 

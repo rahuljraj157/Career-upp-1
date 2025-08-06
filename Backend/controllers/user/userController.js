@@ -430,25 +430,83 @@ export const search = async (req, res, next) => {
     }
 }
 
+// export const displayNotifications = async (req, res, next) => {
+//     try {
+//         const user = req.user;
+
+//         const notifications = await notifyModel.find({receiverUser : user._id})
+//         .populate("senderUser")
+//         .populate('post')
+//         .sort({createdAt : -1}).exec();
+
+//         if(!notifications){
+//             return res.status(404).json({message : 'No new Notifications'});
+//         }
+
+//         return res.status(200).json({message : 'notifications exist' , notifications});
+
+//     } catch (error) {
+//         next(error);
+//     }
+// }
+
+// export const displayNotifications = async (req, res, next) => {
+//   try {
+//     const user = req.user; // logged-in user
+
+//     const notifications = await notifyModel.find({
+//       $or: [
+//         { receiverUser: user._id },
+//         { receiverCompany: user._id }
+//       ]
+//     })
+//     .populate('senderUser') 
+//     .populate('post')
+//     .sort({ createdAt: -1 })
+//     .exec();
+
+//     if (!notifications || notifications.length === 0) {
+//       return res.status(404).json({ message: 'No new Notifications' });
+//     }
+
+//     return res.status(200).json({ message: 'notifications exist', notifications });
+
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 export const displayNotifications = async (req, res, next) => {
-    try {
-        const user = req.user;
+  try {
+    const user = req.user; // logged-in user (can be user or company)
+    let notifications;
 
-        const notifications = await notifyModel.find({receiverUser : user._id})
+    if (user.role === 'company') {
+      notifications = await notifyModel.find({ receiverCompany: user._id })
         .populate("senderUser")
-        .populate('post')
-        .sort({createdAt : -1}).exec();
-
-        if(!notifications){
-            return res.status(404).json({message : 'No new Notifications'});
-        }
-
-        return res.status(200).json({message : 'notifications exist' , notifications});
-
-    } catch (error) {
-        next(error);
+        .populate("post")
+        .sort({ createdAt: -1 })
+        .exec();
+        console.log(notifications," notify for company");
+    } else {
+      notifications = await notifyModel.find({ receiverUser: user._id })
+        .populate("senderUser")
+        .populate("post")
+        .sort({ createdAt: -1 })
+        .exec();
+        console.log(notifications," notify for user");
     }
-}
+
+    if (!notifications || notifications.length === 0) {
+      return res.status(404).json({ message: 'No new Notifications' });
+    }
+
+    return res.status(200).json({ message: 'notifications exist', notifications });
+
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const clearNotifications = async (req, res, next) => {
     try {

@@ -20,10 +20,12 @@ export const getLoginUserData = async () => {
 export const likeAndDislikePost = async (postId : string) => {
     try {
         const response = await axiosInstance.get(`/like/${postId}`)
+        console.log(response.data , 'response from like and dislike post')
 
         if(response.data.message){
             toast.success(response.data.message);
-            return true;
+            return response.data.post;
+
         }
         if (response.data.error) {
             toast.error(response.data.error);
@@ -38,7 +40,7 @@ export const likeAndDislikePost = async (postId : string) => {
 
 export const saveAndUnsavePost = async (postId : string) => {
     try {
-        const response = await axiosInstance.get(`/save/${postId}`)
+        const response = await axiosInstance.post(`/save/${postId}`)
 
         if(response.data.message){
             toast.success(response.data.message);

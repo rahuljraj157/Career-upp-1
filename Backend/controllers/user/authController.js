@@ -8,6 +8,9 @@ import companyModel from '../../models/companyModel.js';
 import { sendVerificationEmail } from '../../utils/verificationMail.js';
 
 
+
+
+
 const hashPassword = async (password) => {
     const salt = await bcrypt.genSalt(10); 
 
@@ -127,7 +130,7 @@ export const otpRegister = async (req, res, next) => {
 
 export const login = async (req, res , next) => {
     try {
-        const {email , password} = req.body.userData;
+        const {email , password} = req.body;
 
         const user = await userModel.findOne({email});
 
@@ -209,15 +212,23 @@ export const googleSignup = async (req, res , next) => {
     }
 }
 
-export const googleLogin = async (req, res , next) => {
+export const googleLogin = async (req, res ) => {
     try {
-        const token = req.body.credential;
+        // const token = req.body.credential;
+        const token = req.body.token;
+
 
         const decodedData = jwt.decode(token);
+            if (!decodedData) {
+      return res.status(401).json({ error: 'Invalid Google token' });
+    }
+    console.log(decodedData,9719);
 
         const {name , email , profileImage , jti} = decodedData;
+        console.log(email,9000000000000)
 
-        const user = await userModel.findOne({email : email});
+        const user = await userModel.findOne({email});
+        console.log(user,89990)
 
         if(user){
 
@@ -226,7 +237,7 @@ export const googleLogin = async (req, res , next) => {
             }
 
             let token = jwt.sign({userId : user.id , email : user.email} , process.env.JWT_SECRET, {expiresIn: '1h'});
-            res.status(200).json({message : 'Login Successfull' ,  token, 
+           return res.status(200).json({message : 'Login Successfull' ,  token, 
                 userData : {
                     username : user.name , useremail : user.email, role : user.role,
                     userId : user._id,
@@ -234,9 +245,189 @@ export const googleLogin = async (req, res , next) => {
                 }});
 
         } else {
-            res.status(401).json({error : 'User not found'});
+             const user = await companyModel.findOne({email});
+              if(user){
+
+            if (user.isBlocked) {
+                return res.status(401).json({ error: 'Account is blocked' });
+            }
+
+            let token = jwt.sign({userId : user.id , email : user.email} , process.env.JWT_SECRET, {expiresIn: '1h'});
+             return res.status(200).json({message : 'Login Successfull' ,  token, 
+                userData : {
+                    username : user.name , useremail : user.email, role : user.role,
+                    userId : user._id,
+                    profileImage : profileImage
+                }});
+
+        }
+
+
+           return res.status(401).json({error : 'User not found'});
         }
     } catch (error) {
-        next(error);
+        console.log(error,179099)
+       return res.status(500).json({error : 'Internal Server Error'});
     }
 }
+
+// const client = new OAuth2Client(process.env.CLIENT_ID);
+// export const googleSignup = async (req, res, next) => {
+//   try {
+//     const ticket = await client.verifyIdToken({
+//       idToken: req.body.credential,
+//       audience: process.env.CLIENT_ID,
+//     });
+
+//     const { name, email, picture } = ticket.getPayload();
+
+//     const user = await userModel.findOne({ email });
+
+//     if (user) {
+//       return res.status(401).json({ error: 'User Already Exist' });
+//     }
+
+//     const newUser = new userModel({
+//       name,
+//       email,
+//       profileImage: picture,
+//       role: 'Candidate',
+//       authProvider: 'google',
+//     });
+
+//     await newUser.save();
+
+//     res.status(201).json({ message: 'User saved successfully' });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+
+
+// // export const googleLogin = async (req, res, next) => {
+// //     console.log(req.body,89998)
+// //   try {
+// //     // const token = req.body.credential;
+// //     const token = req.body.token;
+
+// //     if (!token) {
+// //       return res.status(400).json({ error: 'Missing credential from Google' });
+// //     }
+
+// //     const ticket = await client.verifyIdToken({
+// //       idToken: token,
+// //       audience: process.env.CLIENT_ID,
+// //     });
+
+// //     const decodedData = ticket.getPayload();
+// //     console.log('Decoded Google Data:', decodedData,999999995);
+
+// //     const { name, email, picture } = decodedData;
+
+// //     const user = await userModel.findOne({ email });
+
+// //     if (!user) {
+// //       return res.status(401).json({ error: 'User not found' });
+// //     }
+
+// //     if (user.isBlocked) {
+// //       return res.status(403).json({ error: 'Account is blocked' });
+// //     }
+
+// //     const jwtSecret = process.env.JWT_SECRET;
+// //     if (!jwtSecret) {
+// //       throw new Error('JWT_SECRET not defined in environment');
+// //     }
+
+// //     const authToken = jwt.sign(
+// //       { userId: user.id, email: user.email },
+// //       jwtSecret,
+// //       { expiresIn: '1h' }
+// //     );
+
+// //     return res.status(200).json({
+// //       message: 'Login Successful',
+// //       token: authToken,
+// //       userData: {
+// //         username: user.name,
+// //         useremail: user.email,
+// //         role: user.role,
+// //         userId: user._id,
+// //         profileImage: user.profileImage,
+// //       },
+// //     });
+
+// //   } catch (error) {
+// //     console.error('Google login error:', error);
+// //     return res.status(500).json({ error: 'Internal Server Error' });
+// //   }
+// // };
+
+
+// export const googleLogin = async (req, res, next) => {
+//   console.log(req.body, 89998);
+//   try {
+//     const token = req.body.token;
+
+//     if (!token) {
+//       return res.status(400).json({ error: 'Missing credential from Google' });
+//     }
+
+//     const ticket = await client.verifyIdToken({
+//       idToken: token,
+//       audience: process.env.CLIENT_ID,
+//     });
+
+//     const decodedData = ticket.getPayload();
+//     console.log('Decoded Google Data:', decodedData, 999999995);
+
+//     const { name, email, picture } = decodedData;
+
+//     let user = await userModel.findOne({ email });
+
+//     // 👇 Auto-create user if not found
+//     if (!user) {
+//       user = new userModel({
+//         name,
+//         email,
+//         profileImage: picture,
+//         role: 'Candidate',
+//         authProvider: 'google',
+//       });
+//       await user.save();
+//       console.log('New user created via Google Login:', user.email);
+//     }
+
+//     if (user.isBlocked) {
+//       return res.status(403).json({ error: 'Account is blocked' });
+//     }
+
+//     const jwtSecret = process.env.JWT_SECRET;
+//     if (!jwtSecret) {
+//       throw new Error('JWT_SECRET not defined in environment');
+//     }
+
+//     const authToken = jwt.sign(
+//       { userId: user.id, email: user.email },
+//       jwtSecret,
+//       { expiresIn: '1h' }
+//     );
+
+//     return res.status(200).json({
+//       message: 'Login Successful',
+//       token: authToken,
+//       userData: {
+//         username: user.name,
+//         useremail: user.email,
+//         role: user.role,
+//         userId: user._id,
+//         profileImage: user.profileImage,
+//       },
+//     });
+
+//   } catch (error) {
+//     console.error('Google login error:', error);
+//     return res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };

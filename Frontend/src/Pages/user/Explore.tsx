@@ -108,6 +108,7 @@ const Explore = () => {
 
         return isUserFollowing;
     }
+    console.log(filteredUsers, "filteredUsers", 9777777777);
 
   return (
     <>
@@ -232,6 +233,7 @@ const Explore = () => {
                                             {filteredUsers?.map((userr: any) => (
                                                 <div title='Click to view Profile' className="bg-gradient-to-tl from-[#9facfc] to-[#e9eaec] hover:scale-110 rounded-lg shadow-lg p-3 mb-4" key={userr?._id}>
                                                     <Link to={`/account/${userr?._id}`} className="cursor-pointer">
+                                                        
                                                         <div className="text-center">
                                                             {userr?.profileImage ? (
                                                                 <img

@@ -1,8 +1,9 @@
 //Backend\routes\auth\authRoutes.js
 import express from 'express';
-const router = express.Router();
+
 
 import { register , login , googleSignup, googleLogin, otpRegister } from "../../controllers/user/authController.js";
+const router = express.Router();
 
  
 router.post('/register' , register);

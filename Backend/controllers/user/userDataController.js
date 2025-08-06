@@ -346,9 +346,12 @@ export const getOwnPostedJobs = async (req, res, next) => {
     try {
 
         const user = req.user;
+        console.log(user,"llllllllllll")
 
-        if(user.role === 'Company'){
+
+        if(user.role === 'company'){
             const jobs = await jobModel.find({postedBy : user._id});
+            console.log(jobs,77777777777777777777);
 
             if(!jobs){
                 return res.status(404).json({error : 'No jobs Posted'});
@@ -357,6 +360,7 @@ export const getOwnPostedJobs = async (req, res, next) => {
             res.status(200).json({message: 'Jobs fetched!', jobs});
         } 
     } catch (error) {
+        console.log(error,"errrrrrr")
         next(error);
     }
 }
@@ -366,6 +370,7 @@ export const displayJobs = async (req, res, next) => {
         const user = req.user;
 
         const jobs = await jobModel.find().populate('industry').populate('postedBy').exec();
+        console.log(jobs,44444444444)
         if(!jobs){
             return res.status(404).json({error : 'Data Not found'})
         }

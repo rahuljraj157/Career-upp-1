@@ -169,16 +169,69 @@ export const getPosts = async (req, res, next) => {
   }
 }
 
+// export const getIndividualPosts = async (req, res, next) => {
+//   try {
+//     const userId = req.params.id;
+
+//     const user = req.user;
+
+//     const userObjectId = new mongoose.Types.ObjectId(userId);
+    
+//     if(user.role === 'Candidate'){
+//       let posts = await postModel.find({user : userObjectId , isDeleted : false})
+//       .populate('user')
+//       .populate({
+//         path : 'comments',
+//         populate : {
+//           path : 'userId companyId',
+//           select : 'name profileImage headline'
+//         }
+//       });
+
+//       if(!posts){
+//         return res.status(404).json({error : 'Post not found'});
+//       }
+
+//       return res.status(200).json({message : 'Posts avaialable' , posts});
+
+
+//     } else if (user.role === 'Company'){
+
+//       let posts = await postModel.find({company : userObjectId , isDeleted : false})
+//       .populate('company')
+//       .populate({
+//         path : 'comments',
+//         populate : {
+//           path : 'userId companyId',
+//           select : 'name profileImage headline'
+//         }
+//       });
+
+//       if(!posts){
+//         return res.status(404).json({error : 'Post not found'});
+//       }
+
+//       return res.status(200).json({message : 'Posts avaialable' , posts});
+//     }
+    
+//   } catch (error) {
+//     next(error);
+//   }
+// }
 export const getIndividualPosts = async (req, res, next) => {
   try {
     const userId = req.params.id;
-
-    const user = req.user;
-
     const userObjectId = new mongoose.Types.ObjectId(userId);
-    
-    if(user.role === 'Candidate'){
-      let posts = await postModel.find({user : userObjectId , isDeleted : false})
+
+    const targetUser = await userModel.findById(userObjectId);
+    console.log(targetUser,11);
+    // if(!targetUser){
+    //   return res.status(404).json({error: 'User not found'});
+    // }
+     let posts = [];
+
+    if(targetUser){
+      posts = await postModel.find({user : userObjectId , isDeleted : false})
       .populate('user')
       .populate({
         path : 'comments',
@@ -187,17 +240,13 @@ export const getIndividualPosts = async (req, res, next) => {
           select : 'name profileImage headline'
         }
       });
+      return res.status(200).json({message : 'Posts available' , posts});
+      console.log(posts,87)
 
-      if(!posts){
-        return res.status(404).json({error : 'Post not found'});
-      }
-
-      return res.status(200).json({message : 'Posts avaialable' , posts});
-
-
-    } else if (user.role === 'Company'){
-
-      let posts = await postModel.find({company : userObjectId , isDeleted : false})
+    }else{
+      const targetCompany = await companyModel.findById(userObjectId);
+      console.log(targetCompany,21);
+       posts = await postModel.find({company : userObjectId , isDeleted : false})
       .populate('company')
       .populate({
         path : 'comments',
@@ -206,18 +255,33 @@ export const getIndividualPosts = async (req, res, next) => {
           select : 'name profileImage headline'
         }
       });
+      console.log(posts,37)
+      return res.status(200).json({message : 'Posts available' , posts});
 
-      if(!posts){
-        return res.status(404).json({error : 'Post not found'});
-      }
-
-      return res.status(200).json({message : 'Posts avaialable' , posts});
     }
+
+    
     
   } catch (error) {
-    next(error);
+   console.error('Error fetching individual posts:', error);
+    res.status(500).json({ message: false, error: 'Server error' });
   }
 }
+export const getCompanyPosts = async (req, res) => {
+  try {
+    const companyId = req.params.id;
+    // adjust this query to match your Post model
+    const posts = await postModel.find({ company: companyId, isDeleted: false })
+                            .populate('company', 'name profileImage') // populate company info if needed
+                            .sort({ createdAt: -1 }); 
+    res.status(200).json({ message: true, posts });
+  } catch (error) {
+    console.error('Error fetching company posts:', error);
+    res.status(500).json({ message: false, error: 'Server error' });
+  }
+};
+
+
 
 
 export const getSavedPosts = async (req, res, next) => {
@@ -261,93 +325,197 @@ export const getSavedPosts = async (req, res, next) => {
 // *********************************************************************************
 // *********************************************************************************
 
-export const likeandDislikePost = async (req, res, next) =>{
+// export const likeandDislikePost = async (req, res, next) =>{
+//   try {
+//     const user = req.user;
+//     const postId = req.params.postId;
+
+//     const post  = await postModel.findById(postId).populate('user').populate('company');
+
+//     if(!post){
+//       return res.status(401).json({error : 'No post found'});
+//     }
+
+//     const isLiked = post.likes.includes(user._id);
+//     if(isLiked){
+
+//       post.likes = post.likes.filter((userId) => userId.toString() !== user._id.toString() );
+//       await post.save();
+
+
+//       if(post.user._id.toString() !== user._id.toString() ){
+//         await notifyModel.deleteOne({
+//           message : `${user.name} Liked Your Post`,
+//           receiverUser : post.user,
+//           senderUser : user._id,
+//           post : post._id,
+//           type : 'posts'
+//         })
+//       }
+
+//       return res.status(200).json({message: 'DisLiked Post'});
+
+//     } else {
+
+//       if(post.user._id.toString() === user._id.toString()){
+//         post.likes.push(user._id);
+//         await post.save();
+
+//       } else {
+
+//         post.likes.push(user._id);
+//         await post.save();
+  
+//         await notifyModel.create({
+//           message : `${user.name} Liked Your Post`,
+//           receiverUser : post.user,
+//           senderUser : user._id,
+//           post : post._id,
+//           type : 'posts'
+//         });
+  
+//       }
+
+//       return res.status(200).json({message : 'Post Likes Successfully'});
+//     }
+//   } catch (error) {
+//     next(error);
+//   }
+// }
+export const likeandDislikePost = async (req, res, next) => {
   try {
     const user = req.user;
     const postId = req.params.postId;
 
-    const post  = await postModel.findById(postId).populate('user').populate('company');
+    const post = await postModel.findById(postId).populate('user').populate('company');
 
-    if(!post){
-      return res.status(401).json({error : 'No post found'});
+    if (!post) {
+      return res.status(404).json({ error: 'No post found' });
     }
 
     const isLiked = post.likes.includes(user._id);
-    if(isLiked){
 
-      post.likes = post.likes.filter((userId) => userId.toString() !== user._id.toString() );
+    if (isLiked) {
+      post.likes = post.likes.filter((userId) => userId.toString() !== user._id.toString());
       await post.save();
 
-
-      if(post.user._id.toString() !== user._id.toString() ){
+      if (post.user && post.user._id.toString() !== user._id.toString()) {
         await notifyModel.deleteOne({
-          message : `${user.name} Liked Your Post`,
-          receiverUser : post.user,
-          senderUser : user._id,
-          post : post._id,
-          type : 'posts'
-        })
-      }
-
-      return res.status(200).json({message: 'DisLiked Post'});
-
-    } else {
-
-      if(post.user._id.toString() === user._id.toString()){
-        post.likes.push(user._id);
-        await post.save();
-
-      } else {
-
-        post.likes.push(user._id);
-        await post.save();
-  
-        await notifyModel.create({
-          message : `${user.name} Liked Your Post`,
-          receiverUser : post.user,
-          senderUser : user._id,
-          post : post._id,
-          type : 'posts'
+          message: `${user.name} Liked Your Post`,
+          receiverUser: post.user._id,
+          senderUser: user._id,
+          post: post._id,
+          type: 'posts'
         });
-  
+      }else if(post.company && post.company._id.toString() !== user._id.toString()) {
+        await notifyModel.deleteOne({
+          message: `${user.name} Liked Your Post`,
+          receiverCompany: post.company._id,
+          senderUser: user._id,
+          post: post._id,
+          type: 'posts'
+        });
+
+      }
+      const updatedpost= await postModel.findById(postId) .populate('user')
+      .populate('company')
+      .populate({
+        path : 'comments',
+        populate : {
+          path : 'userId companyId',
+          select : 'name profileImage headline'
+        }
+      })
+      .populate();
+
+      return res.status(200).json({ message: 'Disliked Post', post: updatedpost });
+    } else {
+      post.likes.push(user._id);
+      await post.save();
+
+      if (post.user && post.user._id.toString() !== user._id.toString()) {
+        await notifyModel.create({
+          message: `${user.name} Liked Your Post`,
+          receiverUser: post.user._id,
+          senderUser: user._id,
+          post: post._id,
+          type: 'posts'
+        });
+      }else if(post.company && post.company._id.toString() !== user._id.toString()) {
+        await notifyModel.create({
+          message: `${user.name} Liked Your Post`,
+          receiverCompany: post.company._id,
+          senderUser: user._id,
+          post: post._id,
+          type: 'posts'
+        });
+        console.log("company notification", 9999);
       }
 
-      return res.status(200).json({message : 'Post Likes Successfully'});
+      const updatedpost= await postModel.findById(postId) .populate('user')
+      .populate('company')
+      .populate({
+        path : 'comments',
+        populate : {
+          path : 'userId companyId',
+          select : 'name profileImage headline'
+        }
+      })
+      .populate();
+
+
+      console.log('posts', updatedpost);
+
+
+      return res.status(200).json({ message: 'Post Liked Successfully', post: updatedpost });
+
     }
   } catch (error) {
+    console.error('Error in likeandDislikePost:', error); // log actual error
     next(error);
   }
-}
+};
+
+
 
 export const saveandUnsavePosts = async (req, res, next) => {
   try {
     const postId = req.params.postId;
     const user = req.user;
+    console.log("user:", user,200000);
+    console.log("params:", req.params,7890);
+console.log("postId:", postId,7890);
 
-    const post = await postModel.findById(postId);
+    const post = await postModel.findById(postId)
+    console.log("post:", post, 7890);
 
     if(!post){
+       
       return res.status(404).json({error : 'Post Not Found'});
+     
     }
+    const userData=await userModel.findById(user._id);
 
-    const isSaved = user.savedPosts.some((savedPosts) => savedPosts.postId.toString() === postId.toString());
+    const isSaved = userData.savedPosts.some((savedPosts) => savedPosts.postId.toString() === postId.toString());
+    console.log(isSaved, "isSaved", 66000);
     if(isSaved){
-      user.savedPosts = user.savedPosts.filter((savedPosts) => savedPosts.postId.toString() !== postId.toString());
+      userData.savedPosts = userData.savedPosts.filter((savedPosts) => savedPosts.postId.toString() !== postId.toString());
 
-      await user.save();
+      await userData.save();
       return res.json({message : 'Post Unsaved !'});
 
     } else {
 
-      user.savedPosts.push({postId : post._id});
-      await user.save();
+      console.log("else case",80000)
+      userData.savedPosts.push({postId : post._id});
+      await userData.save();
 
       return res.json({message : 'Post Saved !' });
     }
 
 
   } catch (error) {
-    next(error);
+    console.log(error,"error while saving or unsaving posts");
   }
 }
 
@@ -376,72 +544,120 @@ export const showComment = async (req, res, next) => {
 }
 
 
+// export const addComment = async (req, res, next) => {
+//   try {
+//     const postId = req.params.postId;
+//     const user = req.user;
+//     const {text} = req.body;
+
+//     const findPost = await postModel.findById(postId).populate('user').populate('company');
+//     if(!findPost){
+//       return res.status(404).json({error : 'Post not found'});
+//     }
+
+//     if(user.role === 'Candidate'){
+//       const newComment = new commentModel({
+//         text, userId : user._id , postId
+//       })
+  
+//       await newComment.save();
+  
+//       if(findPost.user._id.toString() === user._id.toString()){
+//         findPost.comments.push(newComment._id);
+//         await findPost.save();
+
+//       } else {
+
+//         findPost.comments.push(newComment._id);
+//         await findPost.save();
+  
+//         await notifyModel.create({
+//           senderUser : user._id,
+//           receiverUser : findPost.user,
+//           type : 'posts',
+//           message: `${user.name} commented on your post`,
+//           post : findPost._id
+//         })
+//       }
+
+//     } else {
+
+//       const newComment = new commentModel({
+//         text, companyId : user._id , postId
+//       });
+  
+//       await newComment.save();
+
+//       if(findPost.user._id.toString() === user._id.toString()){
+//         findPost.comments.push(newComment._id);
+//         await findPost.save();
+        
+//       } else {
+
+//         findPost.comments.push(newComment._id);
+//         await findPost.save();
+  
+//         await notifyModel.create({
+//           senderUser : user._id,
+//           receiverUser : findPost.user,
+//           type : 'posts',
+//           message: `${user.name} commented on your post`,
+//           post : findPost._id
+//         })
+//       }
+//     }
+
+//     return res.json({message : 'Comment Added'});
+
+//   } catch (error) {
+//     next(error);
+//   }
+// }
 export const addComment = async (req, res, next) => {
   try {
     const postId = req.params.postId;
     const user = req.user;
-    const {text} = req.body;
+    const { text } = req.body;
 
     const findPost = await postModel.findById(postId).populate('user').populate('company');
-    if(!findPost){
-      return res.status(404).json({error : 'Post not found'});
+    if (!findPost) {
+      return res.status(404).json({ error: 'Post not found' });
     }
 
-    if(user.role === 'Candidate'){
-      const newComment = new commentModel({
-        text, userId : user._id , postId
-      })
-  
-      await newComment.save();
-  
-      if(findPost.user._id.toString() === user._id.toString()){
-        findPost.comments.push(newComment._id);
-        await findPost.save();
-
-      } else {
-
-        findPost.comments.push(newComment._id);
-        await findPost.save();
-  
-        await notifyModel.create({
-          senderUser : user._id,
-          receiverUser : findPost.user,
-          type : 'posts',
-          message: `${user.name} commented on your post`,
-          post : findPost._id
-        })
-      }
-
-    } else {
-
-      const newComment = new commentModel({
-        text, companyId : user._id , postId
+    let newComment;
+    if (user.role === 'Candidate') {
+      newComment = new commentModel({
+        text,
+        userId: user._id,
+        postId
       });
-  
-      await newComment.save();
-
-      if(findPost.user._id.toString() === user._id.toString()){
-        findPost.comments.push(newComment._id);
-        await findPost.save();
-        
-      } else {
-
-        findPost.comments.push(newComment._id);
-        await findPost.save();
-  
-        await notifyModel.create({
-          senderUser : user._id,
-          receiverUser : findPost.user,
-          type : 'posts',
-          message: `${user.name} commented on your post`,
-          post : findPost._id
-        })
-      }
+    } else {
+      newComment = new commentModel({
+        text,
+        companyId: user._id,
+        postId
+      });
     }
 
-    return res.json({message : 'Comment Added'});
+    await newComment.save();
+    findPost.comments.push(newComment._id);
+    await findPost.save();
+
+    // only add notification if commenting on someone else’s post
+    if (findPost.user && findPost.user._id.toString() !== user._id.toString()) {
+      await notifyModel.create({
+        senderUser: user._id,
+        receiverUser: findPost.user._id,
+        type: 'posts',
+        message: `${user.name} commented on your post`,
+        post: findPost._id
+      });
+    }
+
+    return res.json({ message: 'Comment Added' });
 
   } catch (error) {
+    console.error('Error in addComment:', error);
     next(error);
   }
 }

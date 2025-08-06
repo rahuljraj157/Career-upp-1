@@ -86,7 +86,7 @@ const Auth: React.FC<AuthProps> = ({isLogin}) => {
             <Helmet>
                 <title>{isLogin ? 'Login To CareerUp' : 'Get Started'}</title>
             </Helmet>
-            <GoogleOAuthProvider clientId='373518771897-c2kov4q4nclad5j6976l8phab8vc4s7p.apps.googleusercontent.com'>
+            <GoogleOAuthProvider clientId='1069980957814-rl6peosj00rc6vhdpoosnsv9usbcrgta.apps.googleusercontent.com'>
             <div className='flex flex-col items-center justify-center min-h-screen bg-gradient-to-bl from-[#eef2f3] to-[#8e9eab] p-4'>
                 <div className='bg-white shadow-xl rounded-lg overflow-hidden w-full max-w-3xl mx-auto md:flex'>
                     <div className='w-full md:w-1/2 p-8 flex flex-col justify-center items-center border-b md:border-b-0 md:border-r border-gray-300'>
@@ -199,7 +199,7 @@ const Auth: React.FC<AuthProps> = ({isLogin}) => {
                             <p className='lg:text-lg font-semibold text-center py-1 text-black'>OR</p>
 
                             <div className='flex justify-center items-center'>
-                                <GoogleLogin
+                                {/* <GoogleLogin
                                 onSuccess={ credRes  => {
                                     if(!isLogin) {
                                         axiosInstance.post('/auth/google' , credRes).then((res) => {
@@ -239,7 +239,63 @@ const Auth: React.FC<AuthProps> = ({isLogin}) => {
                                 shape='rectangular'
                                 logo_alignment='center'
                                 ux_mode='popup'
-                                />
+                                /> */}
+                                <GoogleLogin
+    onSuccess={credRes => {
+        const credential = credRes.credential;
+        if (!credential) {
+            toast.error("Google credential not received.");
+            return;
+        }
+
+        if (!isLogin) {
+            axiosInstance.post('/auth/google', { token: credential })
+                .then(res => {
+                    if (res.data) {
+                        toast.success(res.data.message, {
+                            duration: 2000,
+                            style: { color: '#fff', background: 'black' }
+                        });
+                        setTimeout(() => navigate('/login'), 3000);
+                    }
+                })
+                .catch(err => {
+                    console.log(err, 'axios catch err google signup');
+                    toast.error("Google signup failed.");
+                });
+        } else {
+            axiosInstance.post('/auth/google/login', { token: credential })
+                .then(res => {
+                    if (res.data.message) {
+                        dispatch(setUserInfo(res.data.userData));
+                        localStorage.setItem('userToken', JSON.stringify(res.data.token));
+                        toast.success(res.data.message, {
+                            duration: 2000,
+                            style: { color: '#fff', background: 'black' }
+                        });
+                        setTimeout(() => navigate('/feed'), 3000);
+                    } else if (res.data.error) {
+                        toast.error(res.data.error);
+                    }
+                })
+                .catch(err => {
+                    console.log(err, 'axios catch err g login');
+                    toast.error("Google login failed.");
+                });
+        }
+    }}
+    onError={() => {
+        errorPopAlert('Google authentication failed! Please Try Later');
+    }}
+    type='standard'
+    theme='filled_black'
+    size='large'
+    text='continue_with'
+    shape='rectangular'
+    logo_alignment='center'
+    ux_mode='popup'
+/>
+
                             </div>
                         </form>
                     </div>

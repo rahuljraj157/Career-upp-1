@@ -8,7 +8,8 @@ import {  getProfile, jobApplication, getApplicants, listAllUsers, search, listC
 from '../../controllers/user/userController.js';
 import { addBasic } from '../../controllers/user/userDataController.js';
 import { addComment, createPost , deletePost, getPosts, getIndividualPosts,  
-getSavedPosts,  likeandDislikePost, saveandUnsavePosts,  reportPost, deleteComment, getPostsForFeed } 
+getSavedPosts,  likeandDislikePost, saveandUnsavePosts,  reportPost, deleteComment, getPostsForFeed, 
+getCompanyPosts} 
 from '../../controllers/user/postController.js';
 import upload from '../../utils/multerSetup.js';
 
@@ -39,12 +40,14 @@ router.get('/feedposts' , verify, getPostsForFeed);
 router.get('/getposts' , verify,  getPosts);
 
 router.get('/userposts/:id' , verify , getIndividualPosts);
+router.get('/companyposts/:id', verify, getCompanyPosts);
+
 
 router.get('/savedposts' , verify , getSavedPosts);
 
 router.get('/like/:postId', verify, likeandDislikePost);
 
-router.get('/save/:postId' , verify , saveandUnsavePosts);
+router.post('/save/:postId' ,verify,saveandUnsavePosts);
 
 router.post('/postcomment/:postId' , verify , addComment);
 

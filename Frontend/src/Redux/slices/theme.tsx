@@ -9,8 +9,8 @@ export interface SetThemepayload{
 }   
 
 const themeFromLocalStorage = window.localStorage.getItem('theme') ;
-const initialTheme = themeFromLocalStorage ? JSON.parse(themeFromLocalStorage) : 'light';
-
+// const initialTheme = themeFromLocalStorage ? JSON.parse(themeFromLocalStorage) : 'light';
+const initialTheme = themeFromLocalStorage || 'light';
 const initialState : ThemeState = {
     theme : initialTheme 
 };

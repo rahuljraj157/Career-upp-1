@@ -21,6 +21,7 @@ const RecruiterJobTile = () => {
   useEffect(() => {
     axiosInstance.get('/postedjobs')
     .then((res) => {
+      console.log(res.data,999999)
       if(res.data.message){
         setJobs(res.data.jobs);
       }

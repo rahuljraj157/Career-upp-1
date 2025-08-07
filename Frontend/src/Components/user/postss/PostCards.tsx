@@ -88,11 +88,11 @@ const PostCards: React.FC<PostCardProps> = ({
 }, [posts]);
 
 
-  const filteredPosts = showAllposts
-    ? postdata
-    : postdata.filter(
-        (post: any) => post?.user?._id || post?.company?._id === user?.userId
-      );
+  // const filteredPosts = showAllposts
+  //   ? postdata
+  //   : postdata.filter(
+  //       (post: any) => post?.user?._id || post?.company?._id === user?.userId
+  //     );
 
   // Function to toggle showAll state for a specific post
   const toggleShowAll = (postId: string) => {

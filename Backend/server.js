@@ -47,7 +47,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(nocache());
 app.use(morgan('dev'));
-app.use(express.static(path.join(__dirname,"../Frontend/dist")));
+// app.use(express.static(path.join(__dirname,"../Frontend/dist")));
+app.use(express.static(path.join(__dirname,"../Frontend/build")));
 app.use(express.static('Backend/public/resumes')); 
 app.use(express.json()); 
 app.use(express.urlencoded({extended : true})); 
@@ -111,8 +112,11 @@ io.on('connection' , (socket) => {
 })
 
 
+// app.get("*", function (req, res) {
+//     res.sendFile(path.join(__dirname,"../Frontend/dist/index.html"));
+// });
 app.get("*", function (req, res) {
-    res.sendFile(path.join(__dirname,"../Frontend/dist/index.html"));
+    res.sendFile(path.join(__dirname,"../Frontend/build/index.html"));
 });
 
 const port = process.env.PORT || 3000;

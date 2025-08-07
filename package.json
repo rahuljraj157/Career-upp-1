@@ -5,12 +5,13 @@
   "version": "1.0.0",
   "description": "## Links",
   "main": "server.js",
-  "scripts": {
-"build": "cd Backend && npm install && cd ../Frontend && npm install && npm run build",
 
-    "start": "node Backend/server.js",
-    "postinstall": "npm install && npm run build"
-  },
+"scripts": {
+  "build": "cd Backend && npm install && cd ../Frontend && npm install && npm run build",
+  "start": "node Backend/server.js",
+  "postinstall": "npm install && npm run build"
+},
+
   
   "keywords": [],
   "author": "",

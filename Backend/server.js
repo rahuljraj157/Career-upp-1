@@ -35,6 +35,7 @@ const io = new SocketIoServer(server , {
 
 const corsOptions = {
     origin: [
+        "https://career-upp-1-3.onrender.com",
         "https://career-upp-bz9i.onrender.com",
         "http://localhost:5173",
         "https://careerup.website",
